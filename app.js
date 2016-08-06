@@ -4,17 +4,18 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose'); 
+var mongoose = require('mongoose');
 
 var routes = require('./routes/index');
 var api = require('./routes/api');
+var search = require('./routes/search');
 
 
 var dbUrl = 'mongodb://localhost/footprints'
 mongoose.connect(dbUrl, function(err, res){
   if (err)
     console.log('DB CONNECTION FAIL: '+err)
-  else 
+  else
     console.log('DB CONNECTED: '+dbUrl)
 })
 
@@ -36,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/api', api);
+app.use('/search', search);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
