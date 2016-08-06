@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Footprints</h1>
+    <p>Welcome to Footprints Around the World</p>
+
+    <form action="/api/profile" method="post">
+
+    	<input type="text" name="name" placeholder="Name of the Clinic" /><br />
+    	<input type="text" name="email" placeholder="Email" /><br />
+    	<input type="text" name="phonenumber" placeholder="Phone Number" /><br />
+    	<input type="text" name="operationhours" placeholder="Operation Hours" /><br />
+      <input type="text" name="latitude" placeholder="Latitude" /><br />
+      <input type="text" name="longitude" placeholder="Longitude" /><br />
+    	<input type="text" name="address" placeholder="Address" /><br />
+    	<input type="text" name="city" placeholder="City" /><br />
+    	<input type="text" name="country" placeholder="Country" /><br />
+    	<input type="text" name="zipcode" placeholder="Zip/Postal Code" /><br />
+
+        <br />
+        <span>Type of Service You Offer</span>
+        <br />
+  		<input type="radio" name="type" value="Prosthetic" />Prosthetic<br />
+  		<input type="radio" name="type" value="Physical Therapy" />Physical Therapy<br />
+      <input type="radio" name="type" value="Surgery" />Surgery<br />
+
+    	<br />
+      <button type="submit">Submit</button>
+
+  </body>
+</html>
