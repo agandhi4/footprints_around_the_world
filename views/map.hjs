@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
-    <meta name="viewport" content="initial-scale=1.0">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <title>Places Searchbox</title>
     <style>
       html, body {
         height: 100%;
@@ -13,20 +13,174 @@
       #map {
         height: 100%;
       }
+      .controls {
+        margin-top: 10px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+      #target {
+        width: 345px;
+      }
     </style>
   </head>
   <body>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <button id="search-button" class="controls">Search</button>
     <div id="map"></div>
     <script>
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: -34.397, lng: 150.644},
-          zoom: 8
+      // This example adds a search box to a map, using the Google Place Autocomplete
+      // feature. People can enter geographical searches. The search box will return a
+      // pick list containing a mix of places and predicted search terms.
+
+      // This example requires the Places library. Include the libraries=places
+      // parameter when you first load the API. For example:
+      // <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXdAmhn5pBiVTHiUDd9xXE__GRWOPvRWg&libraries=places">
+
+      var HttpClient = function() {
+        this.get = function(aUrl, aCallback) {
+          var anHttpRequest = new XMLHttpRequest();
+          anHttpRequest.onreadystatechange = function() {
+              if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                  aCallback(anHttpRequest.responseText);
+          }
+
+          anHttpRequest.open("GET", aUrl, true );
+          anHttpRequest.send( null );
+        }
+        this.post = function(aUrl, body, aCallback) {
+          var anHttpRequest = new XMLHttpRequest();
+          anHttpRequest.onreadystatechange = function() {
+              if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                  aCallback(anHttpRequest.responseText);
+          }
+
+          anHttpRequest.open("POST", aUrl, true);
+          anHttpRequest.setRequestHeader("Content-type", "application/json");
+          anHttpRequest.send(body);
+        }
+      }
+
+      function setupMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -33.8688, lng: 151.2195},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+        });
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var button = document.getElementById('search-button');
+
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(button);
+
+        var markers = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+
+        button.addEventListener("click", function() {
+          var inputAddress = input.value;
+          var geocodeAPI = "https://maps.googleapis.com/maps/api/geocode/json?address=" + inputAddress + "&key={{api_key}}"
+
+          var aClient = new HttpClient();
+          aClient.get(geocodeAPI, function(response) {
+            var location = JSON.parse(response).results[0]["geometry"]["location"];
+            var request = {
+              'latitude': location['lat'],
+              'longitude': location['lng'],
+              'threshold': 500,
+            }
+            aClient.post('/search', JSON.stringify(request), function(response) {
+              var places = JSON.parse(response);
+
+              if (places.length == 0) {
+                return;
+              }
+
+              // Clear out the old markers.
+              markers.forEach(function(marker) {
+                marker.setMap(null);
+              });
+
+              markers = [];
+
+              // For each place, get the icon, name and location.
+              var bounds = new google.maps.LatLngBounds();
+              places.forEach(function(place) {
+                var icon = {
+                  url: place.icon,
+                  size: new google.maps.Size(71, 71),
+                  origin: new google.maps.Point(0, 0),
+                  anchor: new google.maps.Point(17, 34),
+                  scaledSize: new google.maps.Size(25, 25)
+                };
+
+                // Create a marker for each place.
+                var position = {
+                  'lat': place.latitude,
+                  'lng': place.longitude
+                }
+                markers.push(new google.maps.Marker({
+                  map: map,
+                  icon: icon,
+                  title: place.name,
+                  position: position
+                }));
+
+                bounds.extend(new google.maps.LatLng(position.lat, position.lng));
+
+              //   if (place.geometry.viewport) {
+              //     // Only geocodes have viewport.
+              //     bounds.union(place.geometry.viewport);
+              //   } else {
+              //     bounds.extend(place.geometry.location);
+              //   }
+              });
+              map.fitBounds(bounds);
+              // map.setZoom(13);
+            })
+          });
         });
       }
+
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCr_gBmOwVXdBW8uoRswbVrEQZte6j4xtw&callback=initMap"
-    async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&libraries=places&callback=setupMap"
+         async defer></script>
   </body>
 </html>
