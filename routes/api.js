@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var profileController = require('../controllers/ProfileController')
-var haversine = require('haversine')
 
 var controllers = {
 	profile: profileController
@@ -12,7 +11,7 @@ router.get('/:resource', function(req, res, next) {
 
 	var resource = req.params.resource
 	var controller = controllers[resource]
-	
+
 	if (controller == null){
 		res.json({
 	    	confirmation: 'fail',

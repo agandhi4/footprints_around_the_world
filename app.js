@@ -9,6 +9,7 @@ var mongoose = require('mongoose');
 var routes = require('./routes/index');
 var api = require('./routes/api');
 var search = require('./routes/search');
+var map = require('./routes/map');
 
 
 var dbUrl = 'mongodb://localhost/footprints'
@@ -18,8 +19,6 @@ mongoose.connect(dbUrl, function(err, res){
   else
     console.log('DB CONNECTED: '+dbUrl)
 })
-
-
 
 var app = express();
 
@@ -38,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 app.use('/api', api);
 app.use('/search', search);
+app.use('/map', map);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
